@@ -1,7 +1,6 @@
 #pragma once
 
 #include <gsnext/Renderer/GnDrawBuffer.h>
-#include <gsnext/Renderer/GnDeviceMemory.h>
 #include "GnDeviceVK.h"
 #include "VulkanHelpers.h"
 

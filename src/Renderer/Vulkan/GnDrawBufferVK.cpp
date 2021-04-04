@@ -1,6 +1,5 @@
 #include "GnDrawBufferVK.h"
 #include "GnDeviceVK.h"
-#include "GnDeviceMemoryVK.h"
 
 #include <gsnext/GnLog.h>
 
