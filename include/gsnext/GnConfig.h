@@ -2,11 +2,16 @@
 
 #include <unordered_map>
 #include <gsnext/GnCommon.h>
+#include <gsnext/Renderer/GnAdapterInfo.h>
 
-struct GnConfigData
+struct GnConfig
 {
+    // Adapter
     GnBackendRenderer backend;
-    char adapterId[8];
+    GnAdapterId vulkanAdapter;
+    GnAdapterId d3d12Adapter;
+    
+    // Graphics settings
     bool gpuPaletteConv;
     bool accurateDATE;
     int resolutionScaling;
@@ -16,5 +21,6 @@ struct GnConfigData
     GnBlendAccuracy alphaBlendingAccuracy;
 
     // Advanced settings
-    bool disableDepth;
+    bool disableDepthEmulation;
+    uint32_t maxVramUsage;
 };

@@ -6,6 +6,7 @@ static const char* g_instanceLayers[] = {
 
 // We expect the platform to support these extensions
 static const char* g_instanceExtensions[] = {
+    "VK_KHR_debug_utils",
     "VK_KHR_surface",
     "VK_KHR_win32_surface"
 };
@@ -33,7 +34,7 @@ VkInstance VulkanHelpers::CreateInstance()
     instanceInfo.pApplicationInfo = &appInfo;
     instanceInfo.enabledLayerCount = 1;
     instanceInfo.ppEnabledLayerNames = g_instanceLayers;
-    instanceInfo.enabledExtensionCount = 2;
+    instanceInfo.enabledExtensionCount = GN_ARRAY_SIZE(g_instanceExtensions);
     instanceInfo.ppEnabledExtensionNames = g_instanceExtensions;
 
     VkInstance instance = VK_NULL_HANDLE;
@@ -53,6 +54,32 @@ void VulkanHelpers::GetPhysicalDevices(VkInstance instance, std::vector<VkPhysic
     physicalDevices.resize(numPhysicalDevices);
     result = vkEnumeratePhysicalDevices(instance, &numPhysicalDevices, physicalDevices.data()); // retrieve the list of physical devices
     assert(!VK_CHECK(result));
+}
+
+void VulkanHelpers::GetDeviceLayers(VkPhysicalDevice physicalDevice, std::vector<VkLayerProperties>& layers)
+{
+    uint32_t count;
+
+    vkEnumerateDeviceLayerProperties(physicalDevice, &count, nullptr);
+    layers.resize(count);
+    vkEnumerateDeviceLayerProperties(physicalDevice, &count, layers.data());
+}
+
+void VulkanHelpers::GetDeviceExtensions(VkPhysicalDevice physicalDevice, std::vector<VkExtensionProperties>& extensions)
+{
+    uint32_t count;
+
+    vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &count, nullptr);
+    extensions.resize(count);
+    vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &count, extensions.data());
+}
+
+void VulkanHelpers::GetDeviceQueueFamilies(VkPhysicalDevice physicalDevice, std::vector<VkQueueFamilyProperties>& queueFamilies)
+{
+    uint32_t count;
+    vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &count, nullptr);
+    queueFamilies.resize(count);
+    vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &count, queueFamilies.data());
 }
 
 void VulkanHelpers::DestroyInstance(VkInstance instance)

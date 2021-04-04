@@ -5,8 +5,10 @@ class GnDeviceMemory
 public:
     virtual ~GnDeviceMemory() { }
 
-    virtual size_t GetSize() = 0;
+    virtual void Map() const = 0;
+    virtual void Unmap() const = 0;
+    virtual size_t GetSize() const = 0;
 
-private:
+protected:
     GnDeviceMemory() { }
 };

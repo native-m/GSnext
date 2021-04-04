@@ -4,7 +4,7 @@
 #include "GnPcsx2Main.h"
 
 static std::shared_ptr<GnWindow> g_window;
-GnContext* g_context;
+static std::shared_ptr<GnContext> g_context;
 
 // private functions
 static s32 Gn_OpenWindow(void** pDsp, const char* title);
@@ -31,20 +31,22 @@ const char* CALLBACK PS2EgetLibName(void)
 u32 CALLBACK PS2EgetCpuPlatform()
 {
 #ifdef _M_AMD64
-
     return PS2E_X86_64;
-
 #else
-
     return PS2E_X86;
-
 #endif
 }
 
 s32 CALLBACK GSinit()
 {
     GnLog::Initialize();
-    GnLog::Info("Initializing...");
+
+    if (!g_context) {
+        GnLog::Info("Initializing...");
+
+        g_context = std::make_shared<GnContext>();
+        g_context->SetIniPath("inis/GSnext.ini");
+    }
 
     return 0;
 }
@@ -54,9 +56,7 @@ s32 CALLBACK GSopen(void** pDsp, const char* Title, int multithread)
     s32 ret = 0;
     GnLog::Info("Initializing Window...");
 
-    ret = Gn_OpenWindow(pDsp, Title);
-    g_context = new GnContext();
-    g_context->Initialize(g_window);
+    g_context->Open(pDsp, Title);
 
     return ret;
 }
@@ -66,30 +66,20 @@ void CALLBACK GSclose()
     GnLog::Info("Closing Window...");
 
     if (g_context) {
-        g_context->ResetDevice();
-    }
-
-    if (g_window) {
-        g_window->Close();
+        g_context->Close();
     }
 }
 
 void CALLBACK GSshutdown()
 {
     GnLog::Info("Closing Window...");
-
-    if (g_context) {
-        delete g_context;
-        g_context = nullptr;
-    }
-
-    if (g_window) {
-        g_window->Detach();
-    }
 }
 
 void CALLBACK GSsetSettingsDir(const char* dir)
 {
+    if (g_context) {
+        g_context->SetIniPath(dir);
+    }
 }
 
 void CALLBACK GSsetLogDir(const char* dir)
@@ -98,7 +88,7 @@ void CALLBACK GSsetLogDir(const char* dir)
 
 void CALLBACK GSvsync(int field)
 {
-    g_window->ProcessMessage();
+    g_context->Vsync();
 }
 
 void CALLBACK GSgifTransfer(const u32* pMem, u32 size)
@@ -205,6 +195,8 @@ s32 CALLBACK GSfreeze(int mode, freezeData* data)
 
 void CALLBACK GSconfigure()
 {
+    GSinit();
+    g_context->OpenConfigWindow();
 }
 
 void CALLBACK GSabout()

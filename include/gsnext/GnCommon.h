@@ -1,13 +1,21 @@
 #pragma once
 
 #include <cstdint>
+#include <cassert>
+#include <memory>
+#include <string>
+#include <vector>
+#include <unordered_map>
 
 #define GN_MAX_CHAR 256
+#define GN_ID_LENGTH 16
+#define GN_ARRAY_SIZE(x) (sizeof(x)/sizeof(x[0]))
 
 enum class GnBackendRenderer
 {
     Vulkan,
-    D3D12
+    D3D12,
+    Metal
 };
 
 enum class GnDithering
@@ -76,7 +84,7 @@ enum class GnDepthTestMethod
     Greater
 };
 
-enum class GnFormat
+enum class GnPixelStorageMode
 {
     PSMCT32 = 0x00,
     PSMCT24 = 0x01,
@@ -91,6 +99,7 @@ enum class GnFormat
     PSMZ24 = 0x31,
     PSMZ16 = 0x32,
     PSMZ16S = 0x3a,
+    UnknownPSM = -1
 };
 
 enum class GnTextureFunction

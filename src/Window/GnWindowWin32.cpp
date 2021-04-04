@@ -1,5 +1,7 @@
 #include "GnWindowWin32.h"
 #include <gsnext/GnLog.h>
+#include <locale>
+#include <codecvt>
 
 GnWindowWin32::GnWindowWin32() :
     m_hWnd(nullptr)
@@ -28,6 +30,7 @@ bool GnWindowWin32::Initialize(const std::string& name, int w, int h)
 {
     HINSTANCE hInstance = GetModuleHandle(nullptr);
     WNDCLASSEX wc{};
+    std::wstring str = std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>>().from_bytes(name);
 
     wc.cbSize = sizeof(WNDCLASSEX);
     wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
@@ -47,7 +50,7 @@ bool GnWindowWin32::Initialize(const std::string& name, int w, int h)
     m_hWnd = CreateWindowEx(
         0,
         wc.lpszClassName,
-        L"PCSX2",
+        str.c_str(),
         WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, CW_USEDEFAULT,
         w, h,
@@ -67,11 +70,13 @@ void GnWindowWin32::Open()
     ShowWindow(m_hWnd, SW_SHOW);
     SetForegroundWindow(m_hWnd);
     UpdateWindow(m_hWnd);
+    m_isOpen = true;
 }
 
 void GnWindowWin32::Close()
 {
     ShowWindow(m_hWnd, SW_HIDE);
+    m_isOpen = false;
 }
 
 bool GnWindowWin32::ProcessMessage()
@@ -93,7 +98,12 @@ bool GnWindowWin32::ProcessMessage()
 
 void* GnWindowWin32::GetNativeHandle()
 {
-    return m_hWnd;
+    return static_cast<HWND>(m_hWnd);
+}
+
+bool GnWindowWin32::IsOpen()
+{
+    return m_isOpen;
 }
 
 LRESULT GnWindowWin32::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)

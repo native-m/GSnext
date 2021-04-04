@@ -2,7 +2,16 @@
 
 #include <gsnext/GnCommon.h>
 
-typedef uint64_t GnAdapterId;
+union GnAdapterId
+{
+    char c[GN_ID_LENGTH];
+    uint64_t u64[GN_ID_LENGTH / sizeof(uint64_t)];
+
+    GnAdapterId();
+
+    void FromString(const std::string& str);
+    std::string ToString();
+};
 
 struct GnAdapterInfo
 {

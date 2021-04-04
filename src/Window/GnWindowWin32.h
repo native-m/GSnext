@@ -18,11 +18,13 @@ public:
     void Close() override;
     bool ProcessMessage() override;
     void* GetNativeHandle() override;
+    bool IsOpen() override;
 
     static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 private:
     HWND m_hWnd;
+    bool m_isOpen;
 
     LRESULT OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
 };

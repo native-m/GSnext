@@ -155,7 +155,7 @@ struct GnRegMIPTBP2
     uint16_t TBP4 : 14;
     uint8_t TBW4 : 6;
     uint16_t TBP5 : 14;
-    uint8_t TBW6 : 6;
+    uint8_t TBW5 : 6;
     uint16_t TBP6 : 14;
     uint8_t TBW6 : 6;
     uint8_t _PAD0 : 4;
@@ -291,7 +291,7 @@ struct GnRegUV
     uint16_t U : 14;
     uint8_t _PAD0 : 2;
     uint16_t V : 14;
-    uint8_t _PAD1 : 34;
+    uint64_t _PAD1 : 34;
 };
 
 // Set vertex coordinates (XYZ)
@@ -409,7 +409,7 @@ struct GnRegTEXCLUT
 {
     uint8_t CBW : 6;
     uint8_t COU : 6;
-    uint8_t COV : 10;
+    uint16_t COV : 10;
     uint64_t _PAD0 : 42;
 };
 
@@ -442,7 +442,7 @@ struct GnRegTRXREG
     uint16_t RRW : 12;
     uint32_t _PAD0 : 20;
     uint16_t RRH : 12;
-    uint32_t _PAD0 : 20;
+    uint32_t _PAD1 : 20;
 };
 
 struct GnRegPABE
@@ -457,17 +457,24 @@ struct GnRegSCANMSK
     uint64_t _PAD0 : 62;
 };
 
-#pragma pack(pop)
-
-template<class Register>
-union GnRegWrap64
+struct GnGIFTag
 {
-    GnReg64 r64;
-    Register r;
+    uint16_t NLOOP : 15;
+    uint8_t EOP : 1;
+    uint32_t _PAD0 : 30;
+    uint8_t PRE : 1;
+    uint16_t PRIM : 11;
+    uint8_t FLG : 2;
+    uint8_t NREG : 4;
+    uint64_t REGS;
 };
+
+#pragma pack(pop)
 
 union GnReg64
 {
+    uint32_t u32[2];
+    float f32[2];
     uint64_t u64;
 
     // Registers
@@ -527,10 +534,40 @@ union GnReg64
     }
 };
 
+template<class Register>
+union GnRegWrap64
+{
+    GnReg64 r64;
+    Register r;
+
+    GnRegWrap64() :
+        r64(0)
+    {
+    }
+};
+
 union GnReg128
 {
+    uint32_t u32[4];
+    float f32[4];
     uint64_t u64[2];
     __m128 u128;
+};
+
+struct GnDrawEnvState
+{
+    GnRegWrap64<GnRegTEX0> TEX0;
+    GnRegWrap64<GnRegCLAMP> CLAMP;
+    GnRegWrap64<GnRegTEX1> TEX1;
+    GnRegWrap64<GnRegTEX2> TEX2;
+    GnRegWrap64<GnRegXYOFFSET> XYOFFSET;
+    GnRegWrap64<GnRegMIPTBP1> MIPTBP1;
+    GnRegWrap64<GnRegMIPTBP2> MIPTBP2;
+    GnRegWrap64<GnRegSCISSOR> SCISSOR;
+    GnRegWrap64<GnRegALPHA> ALPHA;
+    GnRegWrap64<GnRegTEST> TEST;
+    GnRegWrap64<GnRegFRAME> FRAME;
+    GnRegWrap64<GnRegZBUF> ZBUF;
 };
 
 struct GnRegState
@@ -541,45 +578,21 @@ struct GnRegState
     GnRegWrap64<GnRegUV> UV;
     GnRegWrap64<GnRegXYZF> XYZF2;
     GnRegWrap64<GnRegXYZ> XYZ2;
-    GnRegWrap64<GnRegTEX0> TEX0_1;
-    GnRegWrap64<GnRegTEX0> TEX0_2;
-    GnRegWrap64<GnRegCLAMP> CLAMP_1;
-    GnRegWrap64<GnRegCLAMP> CLAMP_2;
     GnRegWrap64<GnRegFOG> FOG;
     GnRegWrap64<GnRegXYZF> XYZF3;
     GnRegWrap64<GnRegXYZ> XYZ3;
-    GnRegWrap64<GnRegTEX1> TEX1_1;
-    GnRegWrap64<GnRegTEX1> TEX1_2;
-    GnRegWrap64<GnRegTEX2> TEX2_1;
-    GnRegWrap64<GnRegTEX2> TEX2_2;
-    GnRegWrap64<GnRegXYOFFSET> XYOFFSET_1;
-    GnRegWrap64<GnRegXYOFFSET> XYOFFSET_2;
     GnRegWrap64<GnRegPRMODECONT> PRMODECONT;
     GnRegWrap64<GnRegPRMODE> PRMODE;
     GnRegWrap64<GnRegTEXCLUT> TEXCLUT;
     GnRegWrap64<GnRegSCANMSK> SCANMSK;
-    GnRegWrap64<GnRegMIPTBP1> MIPTBP1_1;
-    GnRegWrap64<GnRegMIPTBP1> MIPTBP1_2;
-    GnRegWrap64<GnRegMIPTBP2> MIPTBP2_1;
-    GnRegWrap64<GnRegMIPTBP2> MIPTBP2_2;
     GnRegWrap64<GnRegTEXA> TEXA;
     GnRegWrap64<GnRegFOGCOL> FOGCOL;
     GnRegWrap64<GnRegTEXFLUSH> TEXFLUSH;
-    GnRegWrap64<GnRegSCISSOR> SCISSOR_1;
-    GnRegWrap64<GnRegSCISSOR> SCISSOR_2;
-    GnRegWrap64<GnRegALPHA> ALPHA_1;
-    GnRegWrap64<GnRegALPHA> ALPHA_2;
     GnRegWrap64<GnRegDIMX> DIMX;
     GnRegWrap64<GnRegDTHE> DTHE;
     GnRegWrap64<GnRegCOLCLAMP> COLCLAMP;
-    GnRegWrap64<GnRegTEST> TEST_1;
-    GnRegWrap64<GnRegTEST> TEST_2;
     GnRegWrap64<GnRegPABE> PABE;
     GnRegWrap64<GnRegFBA> FBA;
-    GnRegWrap64<GnRegFRAME> FRAME_1;
-    GnRegWrap64<GnRegFRAME> FRAME_2;
-    GnRegWrap64<GnRegZBUF> ZBUF_1;
-    GnRegWrap64<GnRegZBUF> ZBUF_2;
     GnRegWrap64<GnRegTRXPOS> TRXPOS;
     GnRegWrap64<GnRegTRXREG> TRXREG;
     GnRegWrap64<GnRegTRXDIR> TRXDIR;
@@ -587,4 +600,9 @@ struct GnRegState
     GnRegWrap64<GnRegSIGNAL> SIGNAL;
     GnRegWrap64<GnRegFINISH> FINISH;
     GnRegWrap64<GnRegLABEL> LABEL;
+    GnDrawEnvState drawEnv[2];
+
+    GnRegState()
+    {
+    }
 };
