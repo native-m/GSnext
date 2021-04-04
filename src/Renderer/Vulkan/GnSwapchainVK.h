@@ -9,6 +9,8 @@ public:
     GnSwapchainVK(VkSurfaceKHR surface, VkSwapchainKHR swapchain);
     ~GnSwapchainVK();
 
+    uint32_t GetCurrentIndex() override;
+
     void UpdateSwapchainIndex(uint32_t newSwapchainIndex);
     VkSurfaceKHR GetSurface() const;
     VkSwapchainKHR GetSwapchain() const;

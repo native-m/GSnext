@@ -24,7 +24,6 @@ public:
     void ExecuteDrawBuffer(GnDrawBuffer* drawBuffer) override;
     void Present(GnSwapchain* swapchain) override;
 
-    void FreeMemory(GnDeviceMemory* memory) override;
     void Destroy(GnTexture* texture) override;
     void Destroy(GnDrawBuffer* drawBuffer) override;
 

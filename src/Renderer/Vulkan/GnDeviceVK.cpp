@@ -103,10 +103,6 @@ void GnDeviceVK::Present(GnSwapchain* swapchain)
     GnSwapchainVK* vkswapchain = static_cast<GnSwapchainVK*>(swapchain);
 }
 
-void GnDeviceVK::FreeMemory(GnDeviceMemory* deviceMemory)
-{
-}
-
 void GnDeviceVK::Destroy(GnTexture* texture)
 {
 }

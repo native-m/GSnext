@@ -2,7 +2,6 @@
 
 #include <gsnext/Renderer/GnRendererTypes.h>
 #include <gsnext/Renderer/GnAdapterInfo.h>
-#include <gsnext/Renderer/GnDeviceMemory.h>
 #include <gsnext/Renderer/GnTexture.h>
 #include <gsnext/Renderer/GnDrawBuffer.h>
 #include <gsnext/Renderer/GnSwapchain.h>
@@ -25,7 +24,6 @@ public:
     virtual void ExecuteDrawBuffer(GnDrawBuffer* drawBuffer) = 0;
     virtual void Present(GnSwapchain* swapchain) = 0;
 
-    virtual void FreeMemory(GnDeviceMemory* memory) = 0;
     virtual void Destroy(GnTexture* texture) = 0;
     virtual void Destroy(GnDrawBuffer* drawBuffer) = 0;
 
