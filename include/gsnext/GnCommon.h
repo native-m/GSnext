@@ -117,3 +117,9 @@ enum class GnTextureWrapMode
     RegionClamp,
     RegionRepeat
 };
+
+struct GnSize2D
+{
+    uint32_t width;
+    uint32_t height;
+};

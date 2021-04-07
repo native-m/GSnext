@@ -6,6 +6,11 @@ GnAdapterId::GnAdapterId() :
 {
 }
 
+GnAdapterId::GnAdapterId(const GnAdapterId& other) :
+    u64 { other.u64[0], other.u64[1] }
+{
+}
+
 void GnAdapterId::FromString(const std::string& str)
 {
     if (str == "0") {

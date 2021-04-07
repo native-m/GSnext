@@ -1,5 +1,7 @@
 #pragma once
 
+#define GN_MAX_QUEUED_IMAGE 3
+
 #include <gsnext/GnCommon.h>
 #include <gsnext/GnWindow.h>
 
@@ -52,26 +54,11 @@ enum class GnFenceType
     SemaphoreSync   // GPU -> GPU sync
 };
 
-struct GnMemoryType
+enum class GnPresentResult
 {
-    enum
-    {
-        DeviceLocal = 1,
-        HostVisible = 1 << 2,
-        HostCoherent = 1 << 3
-    };
-};
-
-struct GnMemoryAllocationDesc
-{
-    size_t size;
-    GnMemoryTypeBits memoryType;
-};
-
-struct GnMemoryBindingDesc
-{
-    GnDeviceMemory* deviceMemory;
-    size_t offset;
+    Ok = 0,
+    Error = -1,
+    SurfaceResized = -2
 };
 
 struct GnTextureDesc

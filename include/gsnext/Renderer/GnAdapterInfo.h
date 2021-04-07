@@ -8,6 +8,7 @@ union GnAdapterId
     uint64_t u64[GN_ID_LENGTH / sizeof(uint64_t)];
 
     GnAdapterId();
+    GnAdapterId(const GnAdapterId& other);
 
     void FromString(const std::string& str);
     std::string ToString();

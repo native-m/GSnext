@@ -17,6 +17,7 @@ public:
     void Open() override;
     void Close() override;
     bool ProcessMessage() override;
+    void GetSize(GnSize2D& size) override;
     void* GetNativeHandle() override;
     bool IsOpen() override;
 

@@ -88,6 +88,7 @@ void CALLBACK GSsetLogDir(const char* dir)
 
 void CALLBACK GSvsync(int field)
 {
+    g_context->ProcessWindowMessages();
     g_context->Vsync();
 }
 
@@ -205,11 +206,28 @@ void CALLBACK GSabout()
 
 s32 CALLBACK GStest()
 {
-    return s32();
+    return 0;
 }
 
 void CALLBACK GSgetDriverInfo(GSdriverInfo* driverInfo)
 {
+}
+
+s32 CALLBACK GSnextTest()
+{
+    void* wnd = nullptr;
+
+    GSinit();
+    GSopen(&wnd, "GSnext Test", 0);
+    
+    while (g_context->ProcessWindowMessages()) {
+        g_context->Vsync();
+    }
+
+    GSclose();
+    GSshutdown();
+
+    return 0;
 }
 
 // private functions

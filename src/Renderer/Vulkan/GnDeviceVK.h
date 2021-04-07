@@ -3,6 +3,7 @@
 #include <gsnext/Renderer/GnDevice.h>
 #include <gsnext/GnWindow.h>
 #include <memory>
+#include <unordered_set>
 #include "VulkanHelpers.h"
 
 class GnDeviceVK : public GnDevice
@@ -22,16 +23,18 @@ public:
     bool CreateSwapchain(const GnSwapchainDesc& desc, GnSwapchain** swapchain) override;
 
     void ExecuteDrawBuffer(GnDrawBuffer* drawBuffer) override;
-    void Present(GnSwapchain* swapchain) override;
 
     void Destroy(GnTexture* texture) override;
     void Destroy(GnDrawBuffer* drawBuffer) override;
+    void Destroy(GnSwapchain* swapchain) override;
 
     GnMemoryTypeBits GetSupportedMemoryType() override;
 
     GnDeviceFormat ConvertPSM(GnPixelStorageMode psm) override;
-
+    
+    VkInstance GetInstance() const;
     VkDevice GetHandle() const;
+    void GetQueue(GnCommandQueue queueType, VkQueue* queue, uint32_t* index);
     VkCommandPool GetDrawCommandPool() const;
     VkCommandPool GetTransferCommandPool() const;
 

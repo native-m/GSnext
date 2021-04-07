@@ -36,5 +36,5 @@ EXPORTS
 	GSconfigure				@33
 	GSabout					@34
 	GStest					@35
-
+	GSnextTest				@36
 

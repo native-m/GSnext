@@ -20,6 +20,8 @@ struct VulkanHelpers
     static void GetDeviceQueueFamilies(VkPhysicalDevice physicalDevice, std::vector<VkQueueFamilyProperties>& queueFamilies);
     static void DestroyInstance(VkInstance instance);
 
+    static VkSemaphore CreateGpuSemaphore(VkDevice device);
+
     inline static VkFormat ConvertFormat(GnDeviceFormat fmt);
 };
 

@@ -63,4 +63,6 @@ void CALLBACK GSabout();
 s32 CALLBACK GStest();
 void CALLBACK GSgetDriverInfo(GSdriverInfo* driverInfo);
 
+s32 CALLBACK GSnextTest();
+
 }

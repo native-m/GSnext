@@ -3,6 +3,8 @@
 #include <memory>
 #include <string>
 
+#include <gsnext/GnCommon.h>
+
 class GnWindow
 {
 public:
@@ -14,6 +16,7 @@ public:
     virtual void Open() { }
     virtual void Close() { }
     virtual bool ProcessMessage() { return true; }
+    virtual void GetSize(GnSize2D& size) { };
     virtual void* GetNativeHandle() = 0;
     virtual bool IsOpen() { return true; }
 

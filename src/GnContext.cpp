@@ -4,7 +4,8 @@
 #include <thread>
 #include "ini.h"
 
-GnContext::GnContext()
+GnContext::GnContext() :
+    m_iniPath("GSnext.ini")
 {
 }
 
@@ -42,13 +43,15 @@ bool GnContext::Open(void** pDsp, const char* title)
         m_window = window;
     }
 
-    InitDevice();
+    InitRenderer();
 
     return true;
 }
 
 void GnContext::Close()
 {
+    m_renderer->Close();
+    m_renderer = nullptr;
     m_window->Close();
 }
 
@@ -72,9 +75,14 @@ void GnContext::Transfer(const uint32_t* mem, uint32_t size)
 
 }
 
+bool GnContext::ProcessWindowMessages()
+{
+    return m_window->ProcessMessage();
+}
+
 void GnContext::Vsync()
 {
-    m_window->ProcessMessage();
+    m_renderer->Vsync();
 }
 
 void GnContext::SetRegsMem(uint32_t* addr)
@@ -86,18 +94,14 @@ void GnContext::SetIniPath(const std::string& path)
     m_iniPath = path;
 }
 
-std::shared_ptr<GnDevice>& GnContext::GetDevice()
+void GnContext::InitRenderer()
 {
-    return m_device;
-}
+    GnLog::Info("Initializing renderer...");
+    m_renderer = GnRenderer::Create(m_config.backend);
 
-bool GnContext::InitDevice()
-{
-    return false;
-}
-
-void GnContext::InitSwapchain()
-{
+    if (!m_renderer->Open(m_window, m_config.vulkanAdapter)) {
+        GnLog::Error("Cannot open and initialize renderer!");
+    }
 }
 
 void GnContext::LoadConfig()

@@ -11,13 +11,15 @@ GnDeviceVK::GnDeviceVK(VkInstance instance, VkPhysicalDevice physicalDevice, VkD
 {
     InitFeatures();
     InitQueue();
+    InitCommandPools();
 }
 
 GnDeviceVK::~GnDeviceVK()
 {
     vkDeviceWaitIdle(m_device);
+    vkDestroyCommandPool(m_device, m_drawCmdPool, nullptr);
+    vkDestroyCommandPool(m_device, m_xferCmdPool, nullptr);
     vkDestroyDevice(m_device, nullptr);
-    VulkanHelpers::DestroyInstance(m_instance);
 }
 
 bool GnDeviceVK::CreateTexture(const GnTextureDesc& desc, GnTexture** texture)
@@ -34,8 +36,22 @@ bool GnDeviceVK::CreateSwapchain(const GnSwapchainDesc& desc, GnSwapchain** swap
 {
     assert(swapchain != nullptr);
     VkSurfaceKHR surface = CreateSurface(desc);
-    
+    bool surfaceSupported = false;
+
     if (surface == VK_NULL_HANDLE) {
+        return false;
+    }
+
+    for (auto& q : m_cmdQueues) {
+        VkBool32 queueSupported = VK_FALSE;
+        vkGetPhysicalDeviceSurfaceSupportKHR(m_physicalDevice, q.second.queueFamilyIndex, surface, &queueSupported);
+
+        surfaceSupported = surfaceSupported || (queueSupported == VK_TRUE);
+    }
+
+    if (!surfaceSupported) {
+        GnLog::Error("WSI support is not available on this device!");
+        vkDestroySurfaceKHR(m_instance, surface, nullptr);
         return false;
     }
 
@@ -62,7 +78,7 @@ bool GnDeviceVK::CreateSwapchain(const GnSwapchainDesc& desc, GnSwapchain** swap
     }
 
     if (!formatSupported) {
-        GnLog::Critical("The image format is not supported by the surface");
+        GnLog::Critical("Image format is not supported by the surface");
         return false;
     }
 
@@ -89,7 +105,12 @@ bool GnDeviceVK::CreateSwapchain(const GnSwapchainDesc& desc, GnSwapchain** swap
         return false;
     }
 
-    *swapchain = new GnSwapchainVK(surface, vkswapchain);
+    *swapchain = new GnSwapchainVK(
+        this,
+        surface,
+        vkswapchain,
+        m_cmdQueues[GnCommandQueue::Direct].cmdQueue,
+        desc.format);
 
     return true;
 }
@@ -98,17 +119,17 @@ void GnDeviceVK::ExecuteDrawBuffer(GnDrawBuffer* drawBuffer)
 {
 }
 
-void GnDeviceVK::Present(GnSwapchain* swapchain)
-{
-    GnSwapchainVK* vkswapchain = static_cast<GnSwapchainVK*>(swapchain);
-}
-
 void GnDeviceVK::Destroy(GnTexture* texture)
 {
 }
 
 void GnDeviceVK::Destroy(GnDrawBuffer* drawBuffer)
 {
+}
+
+void GnDeviceVK::Destroy(GnSwapchain* swapchain)
+{
+    delete swapchain;
 }
 
 GnMemoryTypeBits GnDeviceVK::GetSupportedMemoryType()
@@ -154,9 +175,25 @@ GnDeviceFormat GnDeviceVK::ConvertPSM(GnPixelStorageMode psm)
     return GnDeviceFormat::Unknown;
 }
 
+VkInstance GnDeviceVK::GetInstance() const
+{
+    return m_instance;
+}
+
 VkDevice GnDeviceVK::GetHandle() const
 {
     return m_device;
+}
+
+void GnDeviceVK::GetQueue(GnCommandQueue queueType, VkQueue* queue, uint32_t* index)
+{
+    if (queue != nullptr) {
+        *queue = m_cmdQueues[queueType].cmdQueue;
+    }
+
+    if (index != nullptr) {
+        *index = m_cmdQueues[queueType].queueFamilyIndex;
+    }
 }
 
 VkCommandPool GnDeviceVK::GetDrawCommandPool() const
@@ -197,26 +234,6 @@ void GnDeviceVK::InitFeatures()
 
     if (!(m_32bitFloatZBufferFmt || m_24bitZBuffer8bitStencilFmt || m_24bitZBufferPackedFmt)) {
         GnLog::Warn("GPU must support at least 24-bit depth buffer!");
-    }
-
-    VkPhysicalDeviceMemoryProperties memProperties{};
-
-    vkGetPhysicalDeviceMemoryProperties(m_physicalDevice, &memProperties);
-
-    for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++) {
-        VkMemoryType& memType = memProperties.memoryTypes[i];
-
-        if ((memType.propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT) == VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT) {
-            m_supportedMemoryType |= GnMemoryType::DeviceLocal;
-        }
-
-        if ((memType.propertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) == VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) {
-            m_supportedMemoryType |= GnMemoryType::HostVisible;
-        }
-
-        if ((memType.propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) == VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) {
-            m_supportedMemoryType |= GnMemoryType::HostCoherent;
-        }
     }
 }
 

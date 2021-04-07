@@ -22,10 +22,10 @@ public:
     virtual bool CreateSwapchain(const GnSwapchainDesc& desc, GnSwapchain** swapchain) = 0;
 
     virtual void ExecuteDrawBuffer(GnDrawBuffer* drawBuffer) = 0;
-    virtual void Present(GnSwapchain* swapchain) = 0;
 
     virtual void Destroy(GnTexture* texture) = 0;
     virtual void Destroy(GnDrawBuffer* drawBuffer) = 0;
+    virtual void Destroy(GnSwapchain* swapchain) = 0;
 
     virtual GnMemoryTypeBits GetSupportedMemoryType() = 0;
 

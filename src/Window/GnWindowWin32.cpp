@@ -56,11 +56,25 @@ bool GnWindowWin32::Initialize(const std::string& name, int w, int h)
         w, h,
         nullptr, nullptr,
         hInstance, this);
-    
+
     if (m_hWnd == nullptr) {
         GnLog::Error("Cannot create window (error code: {:x})", GetLastError());
         return false;
     }
+
+    // Adjust client size
+    RECT wndRect{};
+
+    GetWindowRect(m_hWnd, &wndRect);
+    AdjustWindowRect(&wndRect, WS_OVERLAPPEDWINDOW, FALSE);
+    SetWindowPos(
+        m_hWnd,
+        nullptr,
+        wndRect.left,
+        wndRect.top,
+        wndRect.right - wndRect.left,
+        wndRect.bottom - wndRect.top,
+        0);
 
     return true;
 }
@@ -85,15 +99,25 @@ bool GnWindowWin32::ProcessMessage()
 
     while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
     {
-        if (msg.message == WM_QUIT) {
-            return false;
-        }
-
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
 
+    if (msg.message == WM_QUIT) {
+        return false;
+    }
+
     return true;
+}
+
+void GnWindowWin32::GetSize(GnSize2D& size)
+{
+    RECT rect;
+
+    GetClientRect(m_hWnd, &rect);
+
+    size.width = rect.right - rect.left;
+    size.height = rect.bottom - rect.top;
 }
 
 void* GnWindowWin32::GetNativeHandle()
@@ -132,6 +156,7 @@ LRESULT GnWindowWin32::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
     switch (uMsg)
     {
     case WM_CLOSE:
+        PostQuitMessage(0);
         Close();
         break;
     case WM_DESTROY:

@@ -1,15 +1,15 @@
-solution "GSnext"
+workspace "GSnext"
 	location "build"
 	configurations { "Debug", "Release" }
 
 	project "GSnext"
 		kind "StaticLib"
 		language "C++"
-		targetdir "bin/%{cfg.buildcfg}/bin"
+		targetdir "bin/%{cfg.buildcfg}/lib"
 		includedirs {
-			"3rdparty/spdlog/include", 
+			"3rdparty/spdlog/include",
+			"3rdparty/Vulkan-Headers/include",
 			"include/",
-			os.getenv("VULKAN_SDK") .. "/Include"
 		}
 
 		files { 
@@ -21,6 +21,7 @@ solution "GSnext"
 		configuration "Debug"
 			symbols "On"
 			defines { "_DEBUG" }
+			targetname "%{prj.name}-d"
 	
 		configuration "Release"
 			defines { "NDEBUG" }
@@ -52,6 +53,34 @@ solution "GSnext"
 		configuration "Debug"
 			symbols "On"
 			defines { "_DEBUG" }
+			targetname "%{prj.name}-d"
+	
+		configuration "Release"
+			defines { "NDEBUG" }
+
+	project "GSnextTest"
+		kind "ConsoleApp"
+		language "C++"
+		targetdir "bin/%{cfg.buildcfg}/plugins"
+
+		includedirs {
+			"3rdparty/spdlog/include",
+			"3rdparty/pcsx2/include",
+			"include/",
+			"plugin/"
+		}
+
+		files {
+			"test/**.h",
+			"test/**.cpp"
+		}
+
+		links { "GSnextPCSX2" }
+
+		configuration "Debug"
+			symbols "On"
+			defines { "_DEBUG" }
+			targetname "%{prj.name}-d"
 	
 		configuration "Release"
 			defines { "NDEBUG" }

@@ -1,4 +1,5 @@
 #include "VulkanHelpers.h"
+#include <gsnext/GnLog.h>
 
 static const char* g_instanceLayers[] = {
     "VK_LAYER_KHRONOS_validation"
@@ -6,7 +7,7 @@ static const char* g_instanceLayers[] = {
 
 // We expect the platform to support these extensions
 static const char* g_instanceExtensions[] = {
-    "VK_KHR_debug_utils",
+    "VK_EXT_debug_utils",
     "VK_KHR_surface",
     "VK_KHR_win32_surface"
 };
@@ -39,8 +40,11 @@ VkInstance VulkanHelpers::CreateInstance()
 
     VkInstance instance = VK_NULL_HANDLE;
     if (VK_CHECK(vkCreateInstance(&instanceInfo, nullptr, &instance))) {
+        GnLog::Critical("Cannot create instance");
         return nullptr;
     }
+
+    volkLoadInstance(instance);
 
     return instance;
 }
@@ -48,11 +52,11 @@ VkInstance VulkanHelpers::CreateInstance()
 void VulkanHelpers::GetPhysicalDevices(VkInstance instance, std::vector<VkPhysicalDevice>& physicalDevices)
 {
     uint32_t numPhysicalDevices;
-    VkResult result = vkEnumeratePhysicalDevices(instance, &numPhysicalDevices, nullptr); // get number of physical devices
+    VkResult result = vkEnumeratePhysicalDevices(instance, &numPhysicalDevices, nullptr);
     assert(!VK_CHECK(result));
 
     physicalDevices.resize(numPhysicalDevices);
-    result = vkEnumeratePhysicalDevices(instance, &numPhysicalDevices, physicalDevices.data()); // retrieve the list of physical devices
+    result = vkEnumeratePhysicalDevices(instance, &numPhysicalDevices, physicalDevices.data());
     assert(!VK_CHECK(result));
 }
 
@@ -85,4 +89,18 @@ void VulkanHelpers::GetDeviceQueueFamilies(VkPhysicalDevice physicalDevice, std:
 void VulkanHelpers::DestroyInstance(VkInstance instance)
 {
     vkDestroyInstance(instance, nullptr);
+}
+
+VkSemaphore VulkanHelpers::CreateGpuSemaphore(VkDevice device)
+{
+    VkSemaphore semaphore;
+    VkSemaphoreCreateInfo semaphoreInfo{};
+
+    semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+    if (VK_CHECK(vkCreateSemaphore(device, &semaphoreInfo, nullptr, &semaphore))) {
+        return VK_NULL_HANDLE;
+    }
+
+    return semaphore;
 }
